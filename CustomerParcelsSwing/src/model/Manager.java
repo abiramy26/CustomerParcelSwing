@@ -1,9 +1,11 @@
 package model;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +27,7 @@ public class Manager {
         this.parcels = new ArrayList<>();
         this.queueOfCustomers = new QueofCustomers();
         this.parcelMap = new ParcelMap();
-//        this.logger = new Log(); 
+        this.logger = Log.getInstance(); 
     }
 
     public QueofCustomers getQueueOfCustomers() {
@@ -71,8 +73,60 @@ public class Manager {
     }
 
     public void loadParcelsFromCsv(String filePath) throws IOException {
-        
+        List<Parcel> parcels = new ArrayList<>();
+
+        try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
+            String line;
+            line = br.readLine();
+            while ((line = br.readLine()) != null) {
+                String[] values = line.split(",");
+                if (values.length >= 6) {
+                    String parcelId = values[0].trim();
+                    double weight = Double.parseDouble(values[1].trim());
+                    int height = Integer.parseInt(values[2].trim());
+                    int width = Integer.parseInt(values[3].trim());
+                    int length = Integer.parseInt(values[4].trim());
+                    int priority = Integer.parseInt(values[5].trim());
+                    Parcel parcel = new Parcel(parcelId, weight, height, width, length, priority);
+
+                    parcels.add(parcel); // Add to the parcels list
+                    parcelMap.addParcel(parcel); // Add to the parcel map
+                }
+            }
+        }
+
+        this.parcels = parcels;
     }
+
+    public void saveParcelsToCsv(String filePath) throws IOException {
+        System.out.println("Saving parcels to file: " + filePath);
+        System.out.println("Number of parcels to save: " + parcels.size());
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
+            // Write header
+            writer.write("ParcelId,Weight,Height,Width,Length,Priority");
+            writer.newLine();
+
+            // Write parcel data
+            for (Parcel parcel : parcels) {
+                writer.write(String.format("%s,%.2f,%d,%d,%d,%d",
+                        parcel.getParcelId(),
+                        parcel.getWeight(),
+                        parcel.getHeight(),
+                        parcel.getWidth(),
+                        parcel.getLength(),
+                        parcel.getPriority()));
+                writer.newLine();
+            }
+        } catch (IOException e) {
+            System.err.println("Error writing to file: " + filePath);
+            e.printStackTrace();
+            throw e; // Re-throw for upper-level handling
+        }
+
+        System.out.println("Save completed successfully.");
+    }
+    
     public List<Customer> getCustomers() {
     	return customers;
     }
@@ -87,12 +141,18 @@ public class Manager {
         logger.writeLog("Added new customer: " + customer.getName());
     }
 
-    public void addNewParcel(Parcel parcel) {
-        parcels.add(parcel);
-        parcelMap.addParcel(parcel);
-        logger.writeLog("Added new parcel: " + parcel.getParcelId());
+    private Log getLogger() {
+        if (logger == null) {
+            logger = Log.getInstance();
+        }
+        return logger;
     }
-
+    
+    public void addNewParcel(Parcel parcel) {
+        parcels.add(parcel); 
+        parcelMap.addParcel(parcel);
+        getLogger().writeLog("Added new parcel: " + parcel.getParcelId());
+    }
     public void processNextCustomer() {
         Customer customer = queueOfCustomers.removeCustomer();
         if (customer != null) {

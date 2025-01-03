@@ -5,7 +5,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Log {
-	private static Log instance;
+    private static Log instance;
     private BufferedWriter writer;
 
     private Log() {
@@ -33,7 +33,7 @@ public class Log {
         }
     }
 
-    public void close() {
+    public synchronized void close() {
         try {
             if (writer != null) {
                 writer.close();

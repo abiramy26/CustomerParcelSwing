@@ -17,79 +17,53 @@ public class Parcel {
 	        this.priority = priority;
 	    }
 
-	    
-	
-	public String getParcelId() {
+	    public String getParcelId() {
 			return parcelId;
 		}
-
-
 
 		public void setParcelId(String parcelId) {
 			this.parcelId = parcelId;
 		}
 
-
-
 		public double getWeight() {
 			return weight;
 		}
-
-
 
 		public void setWeight(double weight) {
 			this.weight = weight;
 		}
 
-
-
 		public int getHeight() {
 			return height;
 		}
-
-
 
 		public void setHeight(int height) {
 			this.height = height;
 		}
 
-
-
 		public int getWidth() {
 			return width;
 		}
-
-
 
 		public void setWidth(int width) {
 			this.width = width;
 		}
 
-
-
 		public int getLength() {
 			return length;
 		}
-
-
 
 		public void setLength(int length) {
 			this.length = length;
 		}
 
-
-
 		public int getPriority() {
 			return priority;
 		}
 
-
-
 		public void setPriority(int priority) {
 			this.priority = priority;
 		}
-
-
 
 	@Override
     public String toString() {
