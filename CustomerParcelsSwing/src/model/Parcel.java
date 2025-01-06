@@ -7,7 +7,9 @@ public class Parcel {
 	    private int width;
 	    private int length;
 	    private int priority;
-
+	    private boolean processed;
+	    private double fee;
+	    
 	    public Parcel(String parcelId, double weight, int height, int width, int length, int priority) {
 	        this.parcelId = parcelId;
 	        this.weight = weight;
@@ -15,6 +17,7 @@ public class Parcel {
 	        this.width = width;
 	        this.length = length;
 	        this.priority = priority;
+	        this.processed = false;
 	    }
 
 	    public String getParcelId() {
@@ -64,12 +67,36 @@ public class Parcel {
 		public void setPriority(int priority) {
 			this.priority = priority;
 		}
+		
+		public boolean isProcessed() {
+	        return processed;
+	    }
 
-	@Override
-    public String toString() {
-        return "Parcel{parcelId='" + parcelId + "', weight=" + weight +
-                ", dimensions=[" + height + ", " + width + ", " + length +
-                "], type='" + priority + "'}";
-    }
+	    public void setProcessed(boolean processed) {
+	        this.processed = processed;
+	    }
+
+	    
+	    public double getFee() {
+			return fee;
+		}
+
+		public void setFee(double fee) {
+			this.fee = fee;
+		}
+
+		@Override
+	    public String toString() {
+	        return "Parcel{" +
+	                "parcelId='" + parcelId + '\'' +
+	                ", weight=" + weight +
+	                ", height=" + height +
+	                ", width=" + width +
+	                ", length=" + length +
+	                ", priority=" + priority +
+	                ", processed=" + processed +
+	                ", Fee=" + fee +
+	                '}';
+	    }
 	
 }

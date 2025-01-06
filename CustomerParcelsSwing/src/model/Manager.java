@@ -8,7 +8,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -21,6 +23,7 @@ public class Manager {
     private Log logger;
     private List<Customer> customers = new ArrayList<>();
     private List<Parcel> parcels;
+    private Queue<Customer> queueOfCustomers2 = new LinkedList<>();
     
     public Manager() {
         this.customers = new ArrayList<>();
@@ -52,24 +55,26 @@ public class Manager {
     }
     
     public void loadCustomersFromCsv(String filePath) throws IOException {
-        List<Customer> customers = new ArrayList<>();
+        // Clear existing data to avoid duplication
+        customers.clear();
+        queueOfCustomers.clearQueue();
+        List<Customer> customersFromCsv = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
             while ((line = br.readLine()) != null) {
-                String[] values = line.split(","); 
+                String[] values = line.split(",");
                 if (values.length >= 2) {
                     String name = values[0].trim();
                     String parcelId = values[1].trim();
                     Customer customer = new Customer(name, parcelId);
-                    customers.add(customer);
-                    
+                    customersFromCsv.add(customer);
                 }
             }
         }
 
-        this.customers = customers;
-        queueOfCustomers.bulkAddCustomers(customers);
+        this.customers = customersFromCsv;
+        queueOfCustomers.bulkAddCustomers(customersFromCsv);
     }
 
     public void loadParcelsFromCsv(String filePath) throws IOException {

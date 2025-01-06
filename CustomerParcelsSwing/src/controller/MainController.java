@@ -22,4 +22,5 @@ public class MainController {
         ParcelController parcelController = new ParcelController(manager);
         new ParcelView(parcelController);
     }
+
 }

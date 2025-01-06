@@ -30,7 +30,6 @@ public class QueofCustomers {
     
     public void bulkAddCustomers(List<Customer> customers) {
         customerQueue.addAll(customers);
-        saveCustomersToCsv(); // Save once after adding all customers
     }
     public Customer removeCustomer() {
     	Customer removedCustomer = customerQueue.poll();
@@ -72,4 +71,7 @@ public class QueofCustomers {
         this.csvFilePath = csvFilePath;
     }
     
+    public void clearQueue() {
+        customerQueue.clear();
+    }
 }

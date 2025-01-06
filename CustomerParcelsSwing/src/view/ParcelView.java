@@ -2,19 +2,28 @@ package view;
 
 import controller.ParcelController;
 import model.Parcel;
+import model.Worker;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 
 public class ParcelView {
     private JFrame frame;
     private JTable table;
     private ParcelController controller;
+    private Worker worker; 
     private String filePath = "C:\\Users\\User\\Downloads\\java course work\\java course work\\Parcels.csv";
+
     public ParcelView(ParcelController controller) {
         this.controller = controller;
+        this.worker = new Worker();
         initialize();
     }
 
@@ -29,12 +38,9 @@ public class ParcelView {
         JMenu fileMenu = new JMenu("File");
         JMenuItem loadMenuItem = new JMenuItem("Load Parcels");
         loadMenuItem.addActionListener(e -> loadParcelData());
-        JMenuItem saveMenuItem = new JMenuItem("Save Parcels");
-        saveMenuItem.addActionListener(e -> saveParcelData());
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(e -> System.exit(0));
         fileMenu.add(loadMenuItem);
-        fileMenu.add(saveMenuItem);
         fileMenu.add(exitMenuItem);
         menuBar.add(fileMenu);
         frame.setJMenuBar(menuBar);
@@ -47,6 +53,8 @@ public class ParcelView {
         tableModel.addColumn("Width (cm)");
         tableModel.addColumn("Length (cm)");
         tableModel.addColumn("Priority");
+        tableModel.addColumn("Fee");
+        tableModel.addColumn("Processed");
 
         // Table
         table = new JTable(tableModel);
@@ -62,9 +70,12 @@ public class ParcelView {
         addButton.addActionListener(e -> addParcel());
         JButton removeButton = new JButton("Remove Parcel");
         removeButton.addActionListener(e -> removeParcel());
+        JButton processButton = new JButton("Process Parcel");
+        processButton.addActionListener(e -> processParcel()); // Added Process Parcel button
         buttonPanel.add(loadButton);
         buttonPanel.add(addButton);
         buttonPanel.add(removeButton);
+        buttonPanel.add(processButton); // Added Process Parcel button to panel
         frame.add(buttonPanel, BorderLayout.SOUTH);
 
         frame.setVisible(true);
@@ -76,23 +87,20 @@ public class ParcelView {
         JOptionPane.showMessageDialog(frame, "Parcels loaded successfully!");
     }
 
-    private void saveParcelData() {
-        controller.saveParcelsToCsv(); // Replace with your file path
-        JOptionPane.showMessageDialog(frame, "Parcels saved successfully!");
-    }
-
     private void updateTable() {
         List<Parcel> parcels = controller.getAllParcels();
         DefaultTableModel model = (DefaultTableModel) table.getModel();
         model.setRowCount(0); // Clear existing rows
         for (Parcel parcel : parcels) {
-            model.addRow(new Object[]{
+            model.addRow(new Object[] {
                 parcel.getParcelId(),
                 parcel.getWeight(),
                 parcel.getHeight(),
                 parcel.getWidth(),
                 parcel.getLength(),
-                parcel.getPriority()
+                parcel.getPriority(),
+                parcel.getFee(), // Add Fee
+                parcel.isProcessed() ? "Yes" : "No" // Add Processed status
             });
         }
     }
@@ -124,7 +132,7 @@ public class ParcelView {
                 int priority = Integer.parseInt(priorityField.getText().trim());
 
                 Parcel newParcel = new Parcel(parcelId, weight, height, width, length, priority);
-                controller.addParcel(newParcel,filePath);
+                controller.addParcel(newParcel, filePath);
                 updateTable();
                 JOptionPane.showMessageDialog(frame, "Parcel added successfully!");
             } catch (NumberFormatException ex) {
@@ -137,11 +145,43 @@ public class ParcelView {
         int selectedRow = table.getSelectedRow();
         if (selectedRow >= 0) {
             String parcelId = (String) table.getValueAt(selectedRow, 0);
-            controller.removeParcelById(parcelId,filePath);
+            controller.removeParcelById(parcelId, filePath);
             updateTable();
             JOptionPane.showMessageDialog(frame, "Parcel removed successfully: " + parcelId);
         } else {
             JOptionPane.showMessageDialog(frame, "Please select a parcel to remove.");
         }
     }
+
+    private void processParcel() {
+        int selectedRow = table.getSelectedRow();  // Get the selected row in the table
+        if (selectedRow >= 0) {
+            String parcelId = (String) table.getValueAt(selectedRow, 0);  // Get the parcel ID
+            Parcel parcel = controller.getParcelById(parcelId);  // Retrieve the parcel by ID
+
+            if (parcel != null) {
+                // Call the Worker method to process the parcel
+                String resultMessage = worker.processCustomer(parcel, (DefaultTableModel) table.getModel(), selectedRow, filePath);
+
+                // Check the result message returned by the Worker
+                if (resultMessage.equals("Parcel processed successfully.")) {
+                    // If successful, show a success message
+                    JOptionPane.showMessageDialog(frame, "Parcel processed successfully: " + parcelId);
+                } else {
+                    // If the parcel is already processed, show the message
+                    JOptionPane.showMessageDialog(frame, resultMessage);
+                }
+
+            } else {
+                // If the parcel is not found, show an error message
+                JOptionPane.showMessageDialog(frame, "Parcel not found!");
+            }
+        } else {
+            // If no parcel is selected, prompt the user to select one
+            JOptionPane.showMessageDialog(frame, "Please select a parcel to process.");
+        }
+    }
+
+
+    
 }
